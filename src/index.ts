@@ -24,9 +24,9 @@ export default (api: IApi) => {
       },
     },
   });
-  // if (!production || process.env.NODE_ENV === 'development') {
-  //   return
-  // }
+  if (!production || process.env.NODE_ENV === 'development') {
+    return
+  }
   if (!dsn) {
     console.error('只有配置sentry.dsn,才能使用sentry功能。');
     return;
