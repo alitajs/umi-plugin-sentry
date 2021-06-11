@@ -1,6 +1,6 @@
 {
   "name": "@alitajs/sentry",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "umi plugin with sentry",
   "main": "lib/index.js",
   "scripts": {

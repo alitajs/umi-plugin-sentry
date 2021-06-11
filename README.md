@@ -42,7 +42,7 @@ export default defineConfig({
 | :-------------------------: | :----------------------------------------------------------------------------------------------------------------------------: |
 |            debug            |                                           是否开启调试模式，主要是发送之前会打印数据                                           |
 |             dsn             |                           数据链接地址，可以访问 https://sentry.io/ 免费申请，记得选 react 项目类型                            |
-|         production          |                               默认打包之后启用，可以设置这个属性，来在开发环境演示 sentry 功能。                               |
+|         development          |                               默认打包之后启用，可以设置这个属性，来在开发环境演示 sentry 功能。                               |
 | 其他 sentry init 支持的参数 | https://github.com/getsentry/sentry-javascript/blob/0c4fdf60fe1394dd453093fc7ecf6d95ccee070f/packages/types/src/options.ts#L10 |
 
 ## 运行时配置

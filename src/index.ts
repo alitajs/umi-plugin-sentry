@@ -4,12 +4,12 @@ import { readFileSync } from 'fs';
 import { BrowserOptions } from '@sentry/browser';
 
 interface SentryOptions extends BrowserOptions {
-  production?: boolean;
+  development?: boolean;
 }
 
 export default (api: IApi) => {
   const { sentry } = api.userConfig;
-  const { dsn, tracesSampleRate = 1.0, production = false, ...other } = sentry as SentryOptions;
+  const { dsn, tracesSampleRate = 1.0, development = false, ...other } = sentry as SentryOptions;
   // 配置
   api.describe({
     key: 'sentry',
@@ -19,12 +19,42 @@ export default (api: IApi) => {
           dsn: joi.string(),
           tracesSampleRate: joi.string(),
           release: joi.string(),
-          production: joi.boolean()
+          development: joi.boolean()
         });
       },
     },
   });
-  if (!production || process.env.NODE_ENV === 'development') {
+  api.addUmiExports(() =>
+    [
+      {
+        exportAll: true,
+        source: '../plugin-sentry/exports',
+      },
+    ]
+  );
+  api.onGenerateFiles({
+    fn() {
+      // runtime.tsx
+      const runtimeTpl = readFileSync(
+        join(__dirname, 'runtime.tpl'),
+        'utf-8',
+      );
+      api.writeTmpFile({
+        path: 'plugin-sentry/runtime.tsx',
+        content: runtimeTpl,
+      });
+      api.writeTmpFile({
+        path: 'plugin-sentry/exports.tsx',
+        content: `export * as Sentry from '@sentry/react';\nexport type { ErrorBoundaryProps as SentryRunTime } from '@sentry/react/dist/errorboundary';`,
+      });
+    },
+  });
+  api.addRuntimePlugin(() => [
+    join(api.paths.absTmpPath!, 'plugin-sentry/runtime.tsx'),
+  ]);
+  api.addRuntimePluginKey(() => ['sentry']);
+  
+  if (!development && process.env.NODE_ENV === 'development') {
     return
   }
   if (!dsn) {
@@ -62,33 +92,5 @@ export default (api: IApi) => {
       ...${JSON.stringify(other)}
     });`
   });
-  api.addUmiExports(() =>
-    [
-      {
-        exportAll: true,
-        source: '../plugin-sentry/exports',
-      },
-    ]
-  );
-  api.onGenerateFiles({
-    fn() {
-      // runtime.tsx
-      const runtimeTpl = readFileSync(
-        join(__dirname, 'runtime.tpl'),
-        'utf-8',
-      );
-      api.writeTmpFile({
-        path: 'plugin-sentry/runtime.tsx',
-        content: runtimeTpl,
-      });
-      api.writeTmpFile({
-        path: 'plugin-sentry/exports.tsx',
-        content: `export * as Sentry from '@sentry/react';\nexport type { ErrorBoundaryProps as SentryRunTime } from '@sentry/react/dist/errorboundary';`,
-      });
-    },
-  });
-  api.addRuntimePlugin(() => [
-    join(api.paths.absTmpPath!, 'plugin-sentry/runtime.tsx'),
-  ]);
-  api.addRuntimePluginKey(() => ['sentry']);
+  
 };
