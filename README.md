@@ -16,6 +16,8 @@ export default defineConfig({
   plugins: ['@alitajs/sentry'],
   sentry: {
     dsn: '可以访问 https://sentry.io/ 免费申请，记得选 react 项目类型',
+    apiKey: 'xxx',
+    organization: 'sentry',
   },
 });
 ```
@@ -82,6 +84,43 @@ export const sentry = {
   },
 };
 ```
+
+## Options
+
+Sentry 配置像
+
+| 参数 | 描述 | 默认值 |
+| --- | --- | --- |
+| enabled | 是否启用 sentry | `process.env.NODE_ENV !== development` 时为 true |
+| runtime | 是否启用 runtime sentry 组件 | false |
+| dsn | 数据源配置 | 必选参数，默认为空 |
+| release | 发布分支 | 默认取 `package.json` 的 `version` 字段 |
+| environment | 环境变量 如 dev/sit/prod 等 | 默认 `temp` |
+| tracesSampleRate | 采样率 | 默认 1.0 |
+| commit | 获取当前 git 的 commit short hash 附加到 `release` 参数后， 格式 `${version}_${commitHash}` | 获取 short commitHash |
+| 以下为开启 sourceMap 的配置项 |
+| apiKey | 默认为空 |
+| organization | 默认为空 |
+| baseSentryURL | 上传 sourceMap 的 url 地址，格式`https://sentry.io/api/0` | 默认从 `dsn` 提取 |
+| project | 项目名 | 默认取 `package.json` 的 `name` 字段 |
+| include | 包含文件 | `/\.(js | js\.map)$/` |
+| exclude | 排除文件 | `/\.(html | css | css\.map)$/` |
+| deleteAfterCompile | 编译完成删除 sourceMap 文件，避免上传到 cdn 上 | true |
+| suppressConflictError | 控制在上传 sourceMap 时如果版本重复是否中断 webpack 编译流程 | true |
+| filenameTransform | 转化资源对应的路径，~代表域名 | 默认 `filename => join('~/', publicPath, filename)` |
+
+注意点
+
+- 为避免配置变动，影响 bundle hash，导致 http 缓存失效
+  - `version` 会注入到 html，为 `window.APP_VERSION`，标识当前版本号，默认取 `package.json` 中 `version`
+  - `environment` 会注入到 html，为 `window.APP_ENVIRONMENT`，标识运行环境 `dev/sit/beta/prod` 等
+- organization 注意是组织名，不是团队名
+- apiKey 在当前账户下来菜单-API keys 配置
+- suppressConflictError 建议开启，控制在上传 sourceMap 时如果版本重复是否中断 webpack 编译流程
+- filenameTransform 可以用来转化资源对应的路径
+  - 默认取 umi/webpack 的 `publicPath` 配置，如果启用了 cdn，则要去掉域名，只保留路径
+
+上传 sourceMap 时，`dsn`, `apiKey`, `organization` 为必选参数
 
 ## API
 

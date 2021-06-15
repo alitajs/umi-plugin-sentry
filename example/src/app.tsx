@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResponseError } from 'umi-request';
-import { NavBarProps, TitleListItem, NavBarListItem, TabBarProps, Sentry, SentryRunTime } from 'alita';
+import { NavBarProps, TitleListItem, NavBarListItem, TabBarProps ,Sentry, SentryRunTime } from 'alita';
 
 export const request = {
   prefix: '',
