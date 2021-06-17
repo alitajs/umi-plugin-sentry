@@ -45,10 +45,8 @@ interface SentryOptions extends BrowserOptions {
   suppressConflictError?: boolean;
   filenameTransform?: any;
 }
-const {
-  name: packageName = '',
-  version: packageVersion = '0.0.0',
-} = npmPackage();
+const { name: packageName = '', version: packageVersion = '0.0.0' } =
+  npmPackage();
 const DEFAULT_OPTIONS = {
   // Sentry init options
   dsn: '',
@@ -163,14 +161,17 @@ export default (api: IApi) => {
       },
     ];
     if (runtime) {
-      sources = [...sources, {
-        source: './core/history',
-        specifier: '{ history }',
-      },
-      {
-        source: 'react-router-dom',
-        specifier: '{ matchPath }',
-      }];
+      sources = [
+        ...sources,
+        {
+          source: './core/history',
+          specifier: '{ history }',
+        },
+        {
+          source: 'react-router-dom',
+          specifier: '{ matchPath }',
+        },
+      ];
     }
     return sources;
   });
@@ -191,4 +192,81 @@ export default (api: IApi) => {
     // integrations: [new Integrations.BrowserTracing()],
   });
 
+  if (runtime) {
+    api.addUmiExports(() => [
+      {
+        exportAll: true,
+        source: '../plugin-sentry/exports',
+      },
+    ]);
+  }
+
+  // runtime
+  api.onGenerateFiles({
+    fn() {
+      if (runtime) {
+        // runtime.tsx
+        const runtimeTpl = readFileSync(
+          join(__dirname, 'runtime.tpl'),
+          'utf-8',
+        );
+        api.writeTmpFile({
+          path: 'plugin-sentry/runtime.tsx',
+          content: runtimeTpl,
+        });
+      }
+      api.writeTmpFile({
+        path: 'plugin-sentry/exports.tsx',
+        content: `export * as Sentry from '@sentry/react';\nexport type { ErrorBoundaryProps as SentryRunTime } from '@sentry/react/dist/errorboundary';`,
+      });
+    },
+  });
+  if (runtime) {
+    api.addRuntimePlugin(() => [
+      join(api.paths.absTmpPath!, 'plugin-sentry/runtime.tsx'),
+    ]);
+    api.addRuntimePluginKey(() => ['sentry']);
+  }
+
+  // 通过 webpack-sentry-plugin 配置 sentry 自动上传 sourceMap
+  if (!apiKey) return;
+  if (apiKey) {
+    if (!organization || !project) {
+      console.error('上传 sourceMap 必须配置 organization 和 project。');
+      return;
+    }
+  }
+  api.modifyDefaultConfig((config) => {
+    return {
+      ...config,
+      hash: true,
+      devtool: 'source-map',
+    };
+  });
+  api.chainWebpack((config) => {
+    // 从dsn 中提取 origin
+    const params = new URL(dsn);
+    const sentryConfig = {
+      // Sentry options are required
+      apiKey,
+      organization,
+      project,
+      deleteAfterCompile,
+      exclude,
+      include,
+      // baseSentryURL: 'https://sentry.io/api/0',
+      baseSentryURL: baseSentryURL || `${params.origin}/api/0`,
+      suppressConflictError,
+      release: releaseVersion,
+      filenameTransform:
+        filenameTransform ||
+        function (filename: any) {
+          // 此处应结合使用 publicPath 来处理，配置正确 sourceMap 才会生效（~代表域名）
+          return join('~/', publicPath, filename);
+        },
+    };
+
+    config.plugin('sentry').use(SentryPlugin, [sentryConfig]);
+    return config;
+  });
 };
