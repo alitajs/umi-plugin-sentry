@@ -1,6 +1,6 @@
 {
   "name": "@alitajs/sentry",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "umi plugin with sentry",
   "main": "lib/index.js",
   "scripts": {
@@ -23,8 +23,9 @@
   },
   "homepage": "https://github.com/alitajs/umi-plugin-sentry#readme",
   "dependencies": {
-    "@sentry/react": "^6.3.6",
-    "@sentry/tracing": "^6.3.6"
+    "@sentry/react": "^6.5.1",
+    "@sentry/tracing": "^6.5.1",
+    "webpack-sentry-plugin": "2.0.3"
   },
   "devDependencies": {
     "cross-env": "^6.0.3",

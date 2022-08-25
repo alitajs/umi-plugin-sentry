@@ -4,6 +4,12 @@ umi 项目快速介入 [Sentry](https://github.com/getsentry/sentry) 官方 [SDK
 
 Sentry 是一个服务，帮助你监测和修复在实时崩溃。服务器是 Python 的，但是它包含一个完整的 API，用于在任何应用程序中从任何语言发送事件。
 
+## 调试开发
+
+`yarn && yarn build && yarn start`
+
+> 无需在 example 目录下面安装依赖
+
 ## 使用
 
 ```base
@@ -43,6 +49,7 @@ export default defineConfig({
 |            debug            |                                           是否开启调试模式，主要是发送之前会打印数据                                           |
 |             dsn             |                           数据链接地址，可以访问 https://sentry.io/ 免费申请，记得选 react 项目类型                            |
 |         development          |                               默认打包之后启用，可以设置这个属性，来在开发环境演示 sentry 功能。                               |
+|         sourceMap          | 传递给 @sentry/webpack-plugin 的配置，https://docs.sentry.io/platforms/javascript/guides/react/sourcemaps/generating/#webpack                          |
 | 其他 sentry init 支持的参数 | https://github.com/getsentry/sentry-javascript/blob/0c4fdf60fe1394dd453093fc7ecf6d95ccee070f/packages/types/src/options.ts#L10 |
 
 ## 运行时配置
@@ -137,3 +144,4 @@ Sentry.setTag('page_locale', 'de-at');
 ```
 
 以上是我觉得比较常用的方法，如果你想了解更多，请查看 [sentry 的文档](https://docs.sentry.io/platforms/javascript/guides/react/#monitor-performance)。
+
