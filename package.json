@@ -1,39 +1,43 @@
 {
   "name": "@alitajs/sentry",
-  "version": "1.0.4",
-  "description": "umi plugin with sentry",
+  "version": "2.0.0",
+  "description": "umi@4 plugin with sentry",
   "main": "lib/index.js",
   "scripts": {
     "start": "cross-env APP_ROOT=example alita dev",
-    "dev": "father-build -w",
-    "build": "father-build"
+    "app": "cross-env APP_ROOT=example alita build",
+    "dev": "father dev",
+    "build": "father build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alitajs/umi-plugin-sentry.git"
   },
-  "keywords": ["umi-plugin-sentry", "sentry"],
+  "keywords": [
+    "umi-plugin-sentry",
+    "sentry"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/alitajs/umi-plugin-sentry/issues"
   },
   "peerDependencies": {
-    "umi": "3.x"
+    "umi": "4.x"
   },
   "homepage": "https://github.com/alitajs/umi-plugin-sentry#readme",
   "dependencies": {
-    "@sentry/react": "^6.5.1",
-    "@sentry/tracing": "^6.5.1",
-    "webpack-sentry-plugin": "2.0.3"
+    "@sentry/react": "^7.108.0",
+    "@sentry/webpack-plugin": "2.16.0"
   },
   "devDependencies": {
-    "cross-env": "^6.0.3",
+    "@sentry/browser": "^7.108.0",
     "@types/express": "^4.17.2",
+    "alita": "3.3.10",
+    "antd-mobile": "^5.35.0",
+    "cross-env": "^6.0.3",
     "express": "^4.17.1",
-    "@umijs/types": "^3.4.20",
-    "father-build": "^1.19.4",
-    "alita": "2.8.2"
+    "father": "^4.4.0"
   },
   "files": [
     "lib"

@@ -1,9 +1,8 @@
-import { IApi } from "@umijs/types";
+import { IApi } from "umi";
 import { join } from "path";
 import { readFileSync } from "fs";
 import { BrowserOptions } from "@sentry/browser";
-// @ts-ignore
-import SentryPlugin from 'webpack-sentry-plugin';
+import { sentryWebpackPlugin } from '@sentry/webpack-plugin';
 
 interface SentryOptions extends BrowserOptions {
   development?: boolean;
@@ -35,22 +34,18 @@ export default (api: IApi) => {
       },
     },
   });
-  api.addUmiExports(() => [
-    {
-      exportAll: true,
-      source: "../plugin-sentry/exports",
-    },
-  ]);
   api.onGenerateFiles({
     fn() {
       // runtime.tsx
       const runtimeTpl = readFileSync(join(__dirname, "runtime.tpl"), "utf-8");
       api.writeTmpFile({
         path: "plugin-sentry/runtime.tsx",
+        noPluginDir: true,
         content: runtimeTpl,
       });
       api.writeTmpFile({
-        path: "plugin-sentry/exports.tsx",
+        path: "plugin-sentry/index.tsx",
+        noPluginDir: true,
         content: `export * as Sentry from '@sentry/react';\nexport type { ErrorBoundaryProps as SentryRunTime } from '@sentry/react/dist/errorboundary';`,
       });
     },
@@ -74,16 +69,16 @@ export default (api: IApi) => {
         specifier: "* as Sentry",
       },
       {
-        source: "@sentry/tracing",
-        specifier: "{ Integrations }",
+        source: "react",
+        specifier: "{ useEffect }",
+      },
+      {
+        source: "umi",
+        specifier: "{ useLocation, useNavigationType ,createRoutesFromChildren, matchRoutes}",
       },
       {
         source: "./core/history",
         specifier: "{ history }",
-      },
-      {
-        source: "react-router-dom",
-        specifier: "{ matchPath }",
       },
     ];
   });
@@ -91,9 +86,17 @@ export default (api: IApi) => {
     return `Sentry.init({
       dsn:"${dsn}",
       tracesSampleRate: ${tracesSampleRate},
-      integrations: [new Integrations.BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV5Instrumentation(history,getRoutes(),matchPath),
-      })],
+      integrations: [Sentry.reactRouterV6BrowserTracingIntegration({
+        useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes
+    }),
+    Sentry.replayIntegration(),
+  ${sourceMap ? '' : 'new Sentry.Integrations.RewriteFrames()'
+      }
+  ],
       ...${JSON.stringify(other)}
     });`;
   });
@@ -103,11 +106,12 @@ export default (api: IApi) => {
       return {
         ...config,
         hash: true,
+        esbuildMinifyIIFE: true,
         devtool: "source-map",
       };
     });
     api.chainWebpack((config) => {
-      config.plugin("sentry").use(SentryPlugin, [sourceMap]);
+      config.plugin("sentry").use(sentryWebpackPlugin(sourceMap), []);
       return config;
     });
   }

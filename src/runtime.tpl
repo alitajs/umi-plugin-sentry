@@ -1,10 +1,10 @@
 import React from 'react';
 import { ApplyPluginsType } from 'umi';
 import { ErrorBoundary } from "@sentry/react";
-import { plugin } from '../core/umiExports';
+import { getPluginManager } from '../core/plugin';
 
 export function rootContainer(container) {
-  const runtimeSentry = plugin.applyPlugins({
+  const runtimeSentry = getPluginManager().applyPlugins({
     key: 'sentry',
     type: ApplyPluginsType.modify,
     initialValue: {

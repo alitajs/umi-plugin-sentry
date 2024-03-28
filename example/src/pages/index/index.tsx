@@ -14,7 +14,7 @@ const IndexPage: FC<PageProps> = ({ index, dispatch, history }) => {
     });
   }, []);
 
-  const { name } = index;
+  const { name='sentry' } = index;
   return <div className={styles.center} onClick={() => {
     console.log('click');
     Sentry.setUser({ id: "123", username: "xiaohuoni" });
